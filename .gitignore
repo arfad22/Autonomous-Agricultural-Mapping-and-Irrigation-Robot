@@ -1,0 +1,58 @@
+﻿# =========================================
+# ROS 2 Colcon Workspace Ignore Rules
+# =========================================
+
+# Build and Install Artifacts
+build/
+install/
+log/
+**/build/
+**/install/
+**/log/
+
+# Colcon layout files
+.colcon_install_layout
+COLCON_IGNORE
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*.class
+*.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+env/
+venv/
+ENV/
+
+# C / C++ compiled objects & libraries
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# IDE & Editor specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.cproject
+.settings/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Backup files
+*~
+*.swp
+*.swo
+*.bak
