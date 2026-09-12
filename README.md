@@ -13,10 +13,11 @@ An autonomous mobile robotic system designed for indoor/outdoor agricultural env
 ## Key Features
 
 - **2D LiDAR SLAM:** Real-time occupancy grid mapping (/map) using slam_gmapping.
-- **Hardware Integration:** Configured for YDLIDAR (X4 / X2 / G2) via ydlidar_ros2_driver.
+- **Hardware Integration:** Configured for YDLIDAR X2 via ydlidar_ros2_driver.
 - **Kinematics & Odometry:** Custom my_robot package providing /odom broadcasting and static TF transformations.
 - **REP-105 Compliant TF Tree:** Fully connected coordinate frame chain (map -> odom -> ase_link -> laser_frame).
-- **Control Architecture:** Differential drive control and simulation support via os2_control and TurtleBot3 modules.
+- **Control Architecture:** Differential drive control and simulation support via 
+os2_control and TurtleBot3 modules.
 - **Automated CI/CD:** GitHub Actions workflows for continuous build verification on ROS 2 Humble.
 
 ---
@@ -43,14 +44,14 @@ An autonomous mobile robotic system designed for indoor/outdoor agricultural env
 ### Hardware
 | Component | Details |
 | :--- | :--- |
-| **LiDAR Sensor** | YDLIDAR X4 / X2 / G2 (360° 2D LiDAR, 115200 baud, /dev/ttyUSB0) |
-| **Compute Platform** | Single Board Computer (Raspberry Pi 4 / NVIDIA Jetson / Laptop) |
+| **LiDAR Sensor** | YDLIDAR X2 (360° 2D LiDAR, 115200 baud, /dev/ttyUSB0) |
+| **Compute Platform** | Single Board Computer (Raspberry Pi 4B) |
 | **Mobile Base** | 2WD / 4WD Differential Drive Chassis |
 | **Actuation** | DC Motor Drivers, Relay Module, Submersible Irrigation Pump |
 
 ### Software
-- **OS:** Ubuntu 22.04 LTS (Jammy) / Ubuntu 20.04 LTS (Focal)
-- **Middleware:** ROS 2 Humble Hawksbill (or Foxy)
+- **OS:** Ubuntu 22.04 LTS 
+- **Middleware:** ROS 2 Humble 
 - **Build System:** colcon with ment_cmake and ment_python
 - **Visualization:** RViz2
 
@@ -186,7 +187,8 @@ ydlidar_ros2_driver_node:
 - **TF Transform Timeout in RViz:**  
   Verify that ringup_slam.launch.py is running and that the Fixed Frame in RViz is set to map or ase_link.
 - **Empty Map in SLAM:**  
-  Verify that /scan is receiving valid ranges: os2 topic echo /scan --once.
+  Verify that /scan is receiving valid ranges: 
+os2 topic echo /scan --once.
 
 ---
 
