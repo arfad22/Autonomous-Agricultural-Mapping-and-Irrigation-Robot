@@ -1,124 +1,91 @@
-﻿# Autonomous Agricultural Mapping and Irrigation Robot 🚜🌱
+﻿# Autonomous Agricultural Mapping & Irrigation Robot
 
-<p align="center">
-  <img src="https://img.shields.io/badge/ROS_2-Humble%20%7C%20Foxy-22314E?logo=ros&logoColor=white" alt="ROS 2" />
-  <img src="https://img.shields.io/badge/Domain-Smart%20Agriculture%20%26%20Robotics-2ea44f" alt="Smart Agriculture" />
-  <img src="https://img.shields.io/badge/Perception-YDLIDAR%202D%20LiDAR-orange" alt="YDLidar" />
-  <img src="https://img.shields.io/badge/Mapping-2D%20SLAM%20%2F%20GMapping-blue" alt="SLAM" />
-  <img src="https://img.shields.io/badge/Languages-C%2B%2B%20%7C%20Python-blueviolet" alt="Languages" />
-  <img src="https://img.shields.io/badge/License-Apache%202.0-lightgrey" alt="License" />
-</p>
+[![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Foxy-343434.svg?logo=ros&logoColor=white)](https://docs.ros.org/en/humble/)
+[![Language](https://img.shields.io/badge/Language-C%2B%2B%20%7C%20Python-blue.svg)](https://www.python.org/)
+[![SLAM](https://img.shields.io/badge/SLAM-GMapping%20%2F%20Cartographer-green.svg)](https://github.com/ros-perception/slam_gmapping)
+[![Sensor](https://img.shields.io/badge/LiDAR-YDLIDAR%202D-orange.svg)](https://www.ydlidar.com/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](LICENSE)
 
----
-
-## 📌 Abstract & Overview
-
-Precision agriculture is revolutionizing modern farming by replacing uniform field treatments with targeted, autonomous interventions. The **Autonomous Agricultural Mapping and Irrigation Robot** is an intelligent ground vehicle system engineered to navigate through agricultural plots, orchards, and greenhouses. 
-
-Developed as part of the **7th Semester Major Project at RNS Institute of Technology (RNSIT)**, this system integrates **2D LiDAR-based SLAM**, wheel odometry kinematics, real-time coordinate transformations (TF2), and automated path execution to construct high-accuracy spatial maps of agricultural environments for scheduled, localized irrigation and crop monitoring.
+An autonomous mobile robotic system designed for indoor/outdoor agricultural environments, greenhouses, and orchards. It combines 360° 2D LiDAR scanning, wheel odometry kinematics, and real-time SLAM (Simultaneous Localization and Mapping) in **ROS 2** to generate high-resolution field occupancy maps for precise navigation and targeted irrigation.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-- **🌾 Field Mapping & 2D SLAM:** Real-time generation of 2D occupancy grid maps using GMapping and Cartographer across crop rows and obstacles.
-- **📡 360° LiDAR Perception:** High-frequency environmental scanning via YDLidar (0.1m – 12.0m range) for robust obstacle avoidance and localization.
-- **🔄 Complete TF Transformation Tree:** Full compliance with ROS 2 REP 105 standardizing coordinate transformations across world, rover base, and sensors.
-- **🤖 Odometry & Kinematics Engine:** Custom my_robot package providing simulated and real differential drive odometry (/odom -> base_link).
-- **🕹️ Actuation & Control:** Seamless integration with os2_control and os2_controllers for precision motor actuation and differential steering.
-- **🧪 CI/CD & Automated Verification:** GitHub Actions pipeline testing ROS 2 Humble builds on every commit.
-
----
-
-## 🏗️ System Architecture & Coordinate Frames
-
-The robot maintains a continuous TF2 transform tree linking the global map, local odometry, chassis frame, and optical sensor center:
-
-`
-                  ┌───────────────────────────────┐
-                  │           /map Frame          │
-                  └───────────────┬───────────────┘
-                                  │ (Published by SLAM / GMapping)
-                                  ▼
-                  ┌───────────────────────────────┐
-                  │          /odom Frame          │
-                  └───────────────┬───────────────┘
-                                  │ (Published by my_robot / Odometry)
-                                  ▼
-                  ┌───────────────────────────────┐
-                  │       /base_link Frame        │
-                  │   (Robot Geometric Center)    │
-                  └───────────────┬───────────────┘
-                                  │ (Static TF: 0, 0, 0.1m)
-                                  ▼
-                  ┌───────────────────────────────┐
-                  │      /laser_frame Frame       │
-                  │     (YDLIDAR Optical Axis)    │
-                  └───────────────────────────────┘
-`
-
-*(Detailed TF graph verification diagrams are archived in [docs/tf_tree/](./docs/tf_tree/))*
+- **2D LiDAR SLAM:** Real-time occupancy grid mapping (/map) using slam_gmapping.
+- **Hardware Integration:** Configured for YDLIDAR (X4 / X2 / G2) via ydlidar_ros2_driver.
+- **Kinematics & Odometry:** Custom my_robot package providing /odom broadcasting and static TF transformations.
+- **REP-105 Compliant TF Tree:** Fully connected coordinate frame chain (map -> odom -> ase_link -> laser_frame).
+- **Control Architecture:** Differential drive control and simulation support via os2_control and TurtleBot3 modules.
+- **Automated CI/CD:** GitHub Actions workflows for continuous build verification on ROS 2 Humble.
 
 ---
 
-## 📁 Repository Structure
+## TF Frame Hierarchy
 
 `	ext
-Autonomous-Agricultural-Mapping-and-Irrigation-Robot/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml                    # Automated ROS 2 Humble build & test
-│       └── deploy.yml                # Workspace packaging & release pipeline
-├── docs/
-│   └── tf_tree/                      # Verified TF tree graphs (gv & pdf)
-├── src/
-│   ├── my_robot/                     # Custom agricultural rover package
-│   │   ├── my_robot/
-│   │   │   └── fake_odom_publisher.py# Odometry simulation & publisher
-│   │   ├── launch/
-│   │   │   └── bringup_slam.launch.py# Combined TF + Odometry bringup
-│   │   ├── package.xml
-│   │   └── setup.py
-│   ├── ydlidar_ros2_driver/          # YDLidar 2D ROS 2 sensor driver & configurations
-│   │   ├── launch/                   # ydlidar.py, ydlidar_launch.py
-│   │   ├── params/                   # Sensor parameters (baudrate, port, range)
-│   │   └── src/                      # C++ driver & client nodes
-│   ├── slam_gmapping/                # GMapping SLAM engine for ROS 2
-│   ├── turtlebot3/                   # Differential drive description & navigation
-│   ├── ros2_control/                 # Hardware abstraction interfaces
-│   └── ros2_controllers/             # Velocity & differential drive controllers
-├── workspace.repos                   # VCS repos mapping for all upstream modules
-├── .gitignore                        # ROS 2 colcon build ignore rules
-└── README.md                         # Project documentation
+  [ map ]
+     │
+     ▼  (Published by SLAM / GMapping)
+  [ odom ]
+     │
+     ▼  (Published by my_robot / Odometry)
+  [ base_link ]
+     │
+     ▼  (Static TF Broadcaster: [0, 0, 0.1, 0, 0, 0])
+  [ laser_frame ]
 `
 
 ---
 
-## ⚡ Hardware & Software Stack
+## Hardware & Software Stack
 
-### Hardware Components
-- **LiDAR Sensor:** YDLIDAR (X4 / X2 / G2 Series), 360° FOV, USB-UART interface
-- **Compute Unit:** Single Board Computer (Raspberry Pi 4 / NVIDIA Jetson) or Laptop
-- **Chassis & Drive:** 2WD / 4WD Differential Drive Mobile Robot Platform
-- **Irrigation Actuators:** 12V DC Relay Module & Mini Submersible Water Pump / Solenoid Valve
+### Hardware
+| Component | Details |
+| :--- | :--- |
+| **LiDAR Sensor** | YDLIDAR X4 / X2 / G2 (360° 2D LiDAR, 115200 baud, /dev/ttyUSB0) |
+| **Compute Platform** | Single Board Computer (Raspberry Pi 4 / NVIDIA Jetson / Laptop) |
+| **Mobile Base** | 2WD / 4WD Differential Drive Chassis |
+| **Actuation** | DC Motor Drivers, Relay Module, Submersible Irrigation Pump |
 
-### Software Environment
-- **Operating System:** Ubuntu 22.04 LTS (Jammy)
+### Software
+- **OS:** Ubuntu 22.04 LTS (Jammy) / Ubuntu 20.04 LTS (Focal)
 - **Middleware:** ROS 2 Humble Hawksbill (or Foxy)
 - **Build System:** colcon with ment_cmake and ment_python
 - **Visualization:** RViz2
 
 ---
 
-## 🚀 Setup & Installation
+## Repository Structure
 
-### 1. Clone the Repository
-`ash
-git clone https://github.com/arfad22/Autonomous-Agricultural-Mapping-and-Irrigation-Robot.git
-cd Autonomous-Agricultural-Mapping-and-Irrigation-Robot
+`	ext
+.
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                    # Automated build & test on ROS 2 Humble
+│       └── deploy.yml                # Workspace source packaging & release
+├── docs/
+│   └── tf_tree/                      # Verified TF frame trees (.gv, .pdf)
+├── src/
+│   ├── my_robot/                     # Robot odometry publisher & bringup launch
+│   ├── ydlidar_ros2_driver/          # YDLIDAR driver, launch files, and params
+│   ├── slam_gmapping/                # GMapping SLAM package for ROS 2
+│   ├── turtlebot3/                   # Robot descriptions, bringup, and teleop
+│   ├── ros2_control/                 # ROS 2 hardware abstraction framework
+│   └── ros2_controllers/             # Differential drive & trajectory controllers
+├── workspace.repos                   # Upstream package source definitions
+├── .gitignore                        # Standard ROS 2 colcon ignore rules
+└── README.md                         # Project documentation
 `
 
-### 2. Install Dependencies
+---
+
+## Quickstart Guide
+
+### 1. Prerequisites & Dependencies
+
+Install required ROS 2 packages and build tools:
+
 `ash
 sudo apt update && sudo apt install -y \
   python3-colcon-common-extensions \
@@ -131,87 +98,100 @@ sudo apt update && sudo apt install -y \
   ros--nav2-map-server
 `
 
-### 3. Grant USB Permissions for LiDAR
-`ash
-# Allow read/write access to the LiDAR serial port
-sudo chmod 666 /dev/ttyUSB0
+### 2. Build the Workspace
 
-# (Optional) Install permanent udev rules
-sh src/ydlidar_ros2_driver/startup/initenv.sh
-`
-
-### 4. Build the Workspace
 `ash
+# Clone the repository
+git clone https://github.com/arfad22/Autonomous-Agricultural-Mapping-and-Irrigation-Robot.git
+cd Autonomous-Agricultural-Mapping-and-Irrigation-Robot
+
+# Build packages
 colcon build --symlink-install
+
+# Source workspace
+source install/setup.bash
 `
 
-### 5. Source the Workspace
+### 3. Grant Serial Port Permissions
+
+Ensure your user has access to the LiDAR's USB interface:
+
 `ash
-source install/setup.bash
+sudo chmod 666 /dev/ttyUSB0
+# Or add user to the dialout group permanently:
+sudo usermod -aG dialout 
 `
 
 ---
 
-## 🌾 Operation & Execution Workflow
+## Running the System
 
-To perform agricultural mapping and localized navigation, launch the components across separate terminal sessions:
+Open separate terminal windows and source the workspace in each (source install/setup.bash):
 
-### Step 1: Launch the YDLIDAR Sensor Driver
-Streams laser scan data on the /scan topic with frame laser_frame:
+### Terminal 1: Launch YDLIDAR Driver
+Publishes 2D LaserScan measurements to /scan (rame_id: laser_frame):
 `ash
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py
 `
 
-### Step 2: Launch Rover Odometry & Static TF
-Publishes /odom -> base_link and static ase_link -> laser_frame transforms:
+### Terminal 2: Broadcast Odometry & TF Frames
+Broadcasts static ase_link -> laser_frame and dynamic odom -> base_link transforms:
 `ash
 ros2 launch my_robot bringup_slam.launch.py
 `
 
-### Step 3: Launch SLAM Mapping
-Computes 2D occupancy grid and /map -> odom transform in real-time:
+### Terminal 3: Launch GMapping SLAM
+Builds the 2D occupancy grid map (/map) in real-time:
 `ash
 ros2 launch slam_gmapping slam_gmapping.launch.py
 `
 
-### Step 4: Visualize Real-Time Mapping in RViz2
+### Terminal 4: Visualize in RViz2
 `ash
 rviz2 -d src/ydlidar_ros2_driver/config/ydlidar.rviz
 `
 
-### Step 5: Save the Field Map
-Save the generated agricultural plot map for autonomous waypoint navigation:
+### Terminal 5: Save Generated Map
+When mapping is complete, export the occupancy grid files (.pgm and .yaml):
 `ash
 ros2 run nav2_map_server map_saver_cli -f agricultural_field_map
 `
 
 ---
 
-## ⚙️ Sensor Configuration
+## Sensor Parameters
 
-File: src/ydlidar_ros2_driver/params/ydlidar.yaml
+Located at src/ydlidar_ros2_driver/params/ydlidar.yaml:
 
-| Parameter | Configured Value | Description |
-| :--- | :--- | :--- |
-| port | /dev/ttyUSB0 | Hardware serial device port |
-| audrate | 115200 | Serial communication baud rate |
-| rame_id | laser_frame | Sensor coordinate frame identifier |
-| ange_min |  .1 m | Minimum effective measurement distance |
-| ange_max | 12.0 m | Maximum effective measurement distance |
-| sample_rate | 3 | Sampling rate configuration |
-| requency | 10.0 Hz | LiDAR rotational scanning frequency |
-
----
-
-## 🛠️ Troubleshooting & Tips
-
-- **LiDAR Permission Denied:** Run sudo chmod 666 /dev/ttyUSB0 or add your user to the dialout group: sudo usermod -aG dialout .
-- **TF Transform Dropping:** Ensure ake_odom_publisher is active and publishing at 10 Hz or higher.
-- **RViz No Scan Received:** Check that the Fixed Frame in RViz2 is set to map (when SLAM is active) or ase_link.
+`yaml
+ydlidar_ros2_driver_node:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    baudrate: 115200
+    frame_id: laser_frame
+    sample_rate: 3
+    frequency: 10.0
+    range_min: 0.1
+    range_max: 12.0
+    isSingleChannel: true
+    support_motor_dtr: true
+`
 
 ---
 
-## 👥 Academic Credits & Acknowledgments
-- **Project:** 7th Semester Major Project
-- **Institution:** RNS Institute of Technology (RNSIT), Bengaluru
-- **Author / Maintainer:** [Arfad](https://github.com/arfad22)
+## Troubleshooting
+
+- **Serial Port Error (Permission denied /dev/ttyUSB0):**  
+  Run sudo chmod 666 /dev/ttyUSB0 or check if the device appears under a different port (e.g., /dev/ttyUSB1) via ls /dev/ttyUSB*.
+- **TF Transform Timeout in RViz:**  
+  Verify that ringup_slam.launch.py is running and that the Fixed Frame in RViz is set to map or ase_link.
+- **Empty Map in SLAM:**  
+  Verify that /scan is receiving valid ranges: os2 topic echo /scan --once.
+
+---
+
+## License & Credits
+
+- Developed for the **7th Semester Major Project** at **RNS Institute of Technology (RNSIT)**.
+- Maintained by [Arfad](https://github.com/arfad22).
+- Licensed under the [Apache-2.0 License](LICENSE).
