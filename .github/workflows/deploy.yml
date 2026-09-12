@@ -1,0 +1,48 @@
+﻿name: Deploy & Release Workspace Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package-and-deploy:
+    name: Package & Create Release Artifacts
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Clean Source Archive
+        run: |
+          mkdir -p dist
+          tar -czvf dist/ydlidar_ros2_ws-source.tar.gz \
+            --exclude='.git' \
+            --exclude='build' \
+            --exclude='install' \
+            --exclude='log' \
+            --exclude='dist' \
+            .
+
+      - name: Upload Workspace Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ydlidar-ros2-ws-source
+          path: dist/ydlidar_ros2_ws-source.tar.gz
+          retention-days: 30
+
+      - name: Publish GitHub Release (on Tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ydlidar_ros2_ws-source.tar.gz
+          draft: false
+          prerelease: false
+          generate_release_notes: true

@@ -1,0 +1,47 @@
+﻿name: ROS 2 CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test (ROS 2 Humble)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup ROS 2 Humble
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+
+      - name: Install System Dependencies & ROS Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-colcon-common-extensions python3-rosdep python3-vcstool
+
+      - name: Initialize & Update rosdep
+        run: |
+          sudo rosdep init || true
+          rosdep update
+
+      - name: Install Package Dependencies
+        run: |
+          rosdep install -i --from-path src --rosdistro humble -y --skip-keys="ydlidar_sdk" || true
+
+      - name: Build Workspace
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --symlink-install --event-handlers console_direct+
+
+      - name: Run Colcon Tests
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon test --event-handlers console_direct+
+          colcon test-result --all --verbose || true
